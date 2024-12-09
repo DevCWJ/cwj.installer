@@ -25,7 +25,7 @@ namespace CWJ.Installer
 
 		private const string UniRxUrl = "com.neuecc.unirx@https://github.com/neuecc/UniRx.git?path=Assets/Plugins/UniRx/Scripts";
 		private const string UniTaskUrl = "com.cysharp.unitask@https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask";
-		private const string UnityDevToolUrl = "com.cwj.unitydevtool@https://github.com/DevCWJ/unitydevtool.git";
+		private const string UnityDevToolUrl = "com.cwj.unitydevtool@https://github.com/DevCWJ/cwj.unitydevtool.git";
 
 		[InitializeOnLoadMethod]
 		static void Init()
