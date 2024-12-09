@@ -1,7 +1,9 @@
 #if UNITY_EDITOR
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.PackageManager;
+using UnityEditor.PackageManager.Requests;
 using UnityEditor.PackageManager.UI;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -12,13 +14,26 @@ namespace CWJ.Installer
 {
 	public static class PackageAutoInstaller
 	{
+		private const string CWJ_Installer_Name = "com.cwj.installer";
+
+		private static readonly string[] InstallGitUrls = new string[]
+		                                                  {
+			                                                  UniRxUrl,
+			                                                  UniTaskUrl,
+			                                                  UnityDevToolUrl
+		                                                  };
+
+		private const string UniRxUrl = "com.neuecc.unirx@https://github.com/neuecc/UniRx.git?path=Assets/Plugins/UniRx/Scripts";
+		private const string UniTaskUrl = "com.cysharp.unitask@https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask";
+		private const string UnityDevToolUrl = "com.cwj.unitydevtool@https://github.com/DevCWJ/unitydevtool.git";
+
 		[InitializeOnLoadMethod]
 		static void Init()
 		{
-			PackageManagerExtensions.RegisterExtension(new Ex());
+			PackageManagerExtensions.RegisterExtension(new UpmExtension());
 		}
 
-		class Ex : IPackageManagerExtension
+		class UpmExtension : IPackageManagerExtension
 		{
 			public VisualElement CreateExtensionUI()
 			{
@@ -26,7 +41,7 @@ namespace CWJ.Installer
 				VisualElement label = new VisualElement();
 				ExtentionRoot.Add(label);
 				detail = new Label();
-				detail.text = "test";
+				detail.text = "cwj";
 				label.Add(detail);
 
 
@@ -37,11 +52,6 @@ namespace CWJ.Installer
 				buttons.style.flexWrap = Wrap.Wrap;
 
 				const int width = 160;
-
-				openFolder = new Button();
-				openFolder.text = "Open Cache Folder";
-				openFolder.style.width = width;
-				buttons.Add(openFolder);
 
 				opengit = new Button();
 				opengit.text = "Open Git Link";
@@ -70,15 +80,18 @@ namespace CWJ.Installer
 
 			public void OnPackageSelectionChange(PackageInfo packageInfo)
 			{
-				//packageInfo It is always null and should be a bug.
 				current = packageInfo;
 				bool isGit = current?.source == PackageSource.Git;
 
 				detail.text = $"[Git : {isGit}]";
-				if (current != null && current.name == "com.cwj.unitydevtool.installer")
+
+				if (current != null)
 				{
-					Debug.LogError("installed " + packageInfo.displayName);
-					// Debug.Log(current.displayName + "    " + StringUtil.ToStringReflection(current));
+					Debug.LogError("Installed: " + packageInfo.displayName + "\n" + current.packageId);
+					if (current.name == CWJ_Installer_Name || InstallGitUrls.Contains(current.packageId))
+					{
+						EditorApplication.update += InstallPackages;
+					}
 				}
 
 				opengit.SetEnabled(isGit);
@@ -90,6 +103,48 @@ namespace CWJ.Installer
 
 			public void OnPackageRemoved(PackageInfo packageInfo)
 			{
+			}
+		}
+
+
+		private static AddRequest currentRequest;
+		private static int currentIndex;
+
+		private static void InstallPackages()
+		{
+			// Unity 에디터가 실행 중일 때만 동작
+			if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isCompiling)
+				return;
+
+			// 설치 요청이 없으면 새 요청 시작
+			if (currentRequest == null && currentIndex < InstallGitUrls.Length)
+			{
+				Debug.LogError($"Installing package: {InstallGitUrls[currentIndex]}");
+				currentRequest = Client.Add(InstallGitUrls[currentIndex]);
+			}
+
+			// 요청 상태 확인
+			if (currentRequest != null && currentRequest.IsCompleted)
+			{
+				if (currentRequest.Status == StatusCode.Success)
+				{
+					Debug.LogError($"Successfully installed: {InstallGitUrls[currentIndex]}");
+				}
+				else if (currentRequest.Status >= StatusCode.Failure)
+				{
+					Debug.LogError($"Failed to install: {InstallGitUrls[currentIndex]} - {currentRequest.Error.message}");
+				}
+
+				// 다음 패키지로 이동
+				currentRequest = null;
+				currentIndex++;
+			}
+
+			// 모든 패키지 설치 완료 시 업데이트 종료
+			if (currentIndex >= InstallGitUrls.Length)
+			{
+				Debug.LogError("All packages installed.");
+				EditorApplication.update -= InstallPackages;
 			}
 		}
 	}
