@@ -1,7 +1,7 @@
 {
   "name": "com.cwj.installer",
   "version": "1.0.1",
-  "displayName": "CWJ Library Installer",
+  "displayName": "CWJ.LibraryInstaller",
   "description": "CWJ's personal common library installer",
   "unity": "2021.3",
   "dependencies": {
