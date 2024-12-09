@@ -1,4 +1,4 @@
-#if UNITY_EDITOR
+#if UNITY_EDITOR && !CWJ_SCENEENUM_ENABLED && !CWJ_SCENEENUM_DISABLED
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
@@ -87,7 +87,6 @@ namespace CWJ.Installer
 
 				if (current != null)
 				{
-					Debug.LogError("Installed: " + packageInfo.displayName + "\n" + current.packageId);
 					if (current.name == CWJ_Installer_Name || InstallGitUrls.Contains(current.packageId))
 					{
 						EditorApplication.update += InstallPackages;
@@ -110,6 +109,7 @@ namespace CWJ.Installer
 		private static AddRequest currentRequest;
 		private static int currentIndex;
 
+		//TODO : 이미 설치된것은 설치하려하면안됨.
 		private static void InstallPackages()
 		{
 			// Unity 에디터가 실행 중일 때만 동작
@@ -119,7 +119,7 @@ namespace CWJ.Installer
 			// 설치 요청이 없으면 새 요청 시작
 			if (currentRequest == null && currentIndex < InstallGitUrls.Length)
 			{
-				Debug.LogError($"Installing package: {InstallGitUrls[currentIndex]}");
+				Debug.Log($"Installing package: {InstallGitUrls[currentIndex]}");
 				currentRequest = Client.Add(InstallGitUrls[currentIndex]);
 			}
 
@@ -128,7 +128,7 @@ namespace CWJ.Installer
 			{
 				if (currentRequest.Status == StatusCode.Success)
 				{
-					Debug.LogError($"Successfully installed: {InstallGitUrls[currentIndex]}");
+					Debug.Log($"Successfully installed: {InstallGitUrls[currentIndex]}");
 				}
 				else if (currentRequest.Status >= StatusCode.Failure)
 				{
@@ -143,7 +143,7 @@ namespace CWJ.Installer
 			// 모든 패키지 설치 완료 시 업데이트 종료
 			if (currentIndex >= InstallGitUrls.Length)
 			{
-				Debug.LogError("All packages installed.");
+				Debug.Log("All packages installed.");
 				EditorApplication.update -= InstallPackages;
 			}
 		}
