@@ -16,9 +16,10 @@
     "library"
   ],
   "hideInEditor": false,
+  "category": "CWJ",
   "author": {
     "name": "CWJ",
     "email": "cwj@kakao.com",
-    "url": ""
+    "url": "https://github.com/DevCWJ/cwj.installer"
   }
 }
