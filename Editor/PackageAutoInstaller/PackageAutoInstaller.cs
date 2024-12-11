@@ -58,18 +58,17 @@ namespace CWJ.Installer
 
 				const int width = 160;
 
-				installBtn = new Button();
-				installBtn.text = "Install Packages";
-				installBtn.clicked += OnClickInstallBtn;
-				installBtn.style.width = width;
-				buttonLine1.Add(installBtn);
-
 				changeApiCompatibilityBtn = new Button();
 				changeApiCompatibilityBtn.text = "Change API Compatibility";
 				changeApiCompatibilityBtn.clicked += ChangeApiCompatibility;
 				changeApiCompatibilityBtn.style.width = width;
 				buttonLine1.Add(changeApiCompatibilityBtn);
 
+				installBtn = new Button();
+				installBtn.text = "Install Packages";
+				installBtn.clicked += OnClickInstallBtn;
+				installBtn.style.width = width;
+				buttonLine1.Add(installBtn);
 
 				VisualElement buttonsLine2 = new VisualElement();
 				ExtentionRoot.Add(buttonsLine2);
